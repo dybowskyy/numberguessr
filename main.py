@@ -1,12 +1,11 @@
 import customtkinter as ctk
 import random
 from PIL import Image
-from select import error
 
 # WHAT THE NUMBERGUESSR NEEDS:
 # 1. An input box with a way to store user's input in a variable - DONE
 # 2. A function that generates a random number and checks whether the input matches the number. - DONE
-#    a) Notify the player whether they guess correctly or not
+#    a) Notify the player whether they guess correctly or not - DONE
 #    b) Add a limit on guesses, leading to "Game over" if they exceed it.
 # 3. Feedback mechanism - a function that tells the user either "Too high!" or "Too low!" depending on his guess - DONE
 # 4. Difficulty levels - allow the user to choose his difficulty level. E.g. 1-10, 1-50, 1-100 etc.
@@ -14,6 +13,19 @@ from select import error
 # 6. Error handling
 # 7. The ability to save progress
 # 8. A good-looking UI with effects/animations
+
+class SettingsUI(ctk.CTkToplevel):
+    def __init__(self):
+        super().__init__()
+        # Configure the window
+        self.title("Settings")
+        self.geometry("400x300")
+        self.resizable(False, False)
+        ctk.set_appearance_mode("dark")
+        ctk.set_default_color_theme("dark-blue")
+        self.label = ctk.CTkLabel(self, text="Settings")
+        self.label.pack(padx=20, pady=20)
+
 
 class NumberGuessr(ctk.CTk):
     def __init__(self):
@@ -24,8 +36,6 @@ class NumberGuessr(ctk.CTk):
         self.jinn_dialog.configure(text="Take a guess")
 
     def user_guess(self, user_guess):
-        print(user_guess)
-        print(self.randomNumber)
         try:
             if int(user_guess) > self.randomNumber:
                 self.jinn_dialog.configure(text="Too high!")
@@ -37,6 +47,11 @@ class NumberGuessr(ctk.CTk):
         except Exception as e:
             self.jinn_dialog.configure(text="Please enter a valid number.")
 
+    def open_settings(self):
+        if self.settings_window is None or not self.settings_window.winfo_exists():
+            self.settings_window = SettingsUI()  # create window if its None or destroyed
+        else:
+            self.settings_window.focus()
 
 class NumberGuessrUI(NumberGuessr):
     def __init__(self):
@@ -65,14 +80,19 @@ class NumberGuessrUI(NumberGuessr):
         self.empty_field = ctk.CTkLabel(master=self.main_frame, height=150, text="")
         self.empty_field.grid(row=3)
         # Input Field
-        self.input_field = ctk.CTkEntry(master=self.main_frame,  font=("Roboto", 20), width=320)
+        self.input_field = ctk.CTkEntry(master=self.main_frame,  font=("Roboto", 20), width=320, corner_radius=10)
         self.input_field.grid(row=4, pady=5, sticky="nswe")
         self.input_field.bind("<Return>", lambda event: self.user_guess(self.input_field.get()))
         # Guess button
-        self.guess_button = ctk.CTkButton(master=self.main_frame, width=320, font=("Roboto", 20), text="GUESS", hover=True, command=lambda: self.user_guess(self.input_field.get()))
+        self.guess_button = ctk.CTkButton(master=self.main_frame, width=320, font=("Roboto", 20), text="GUESS", corner_radius=10, command=lambda: self.user_guess(self.input_field.get()))
         self.guess_button.grid(row=5, pady=5, sticky="nswe")
 
         self.new_round()
+        # Settings button
+        self.settings_button = ctk.CTkButton(master=self.main_frame, command=self.open_settings)
+        self.settings_button.grid(row=0, pady=20, padx=20, sticky="nsew")
+        self.settings_window = None
+
 
 if __name__ == "__main__":
     app = NumberGuessrUI()
